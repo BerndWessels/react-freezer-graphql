@@ -11,8 +11,8 @@
  * Export the configuration.
  */
 export default {
-  baseurl: '/',
+  baseurl: process.env.BASEURL || '/',
   graphql: {
-    endpoint: process.env.GRAPHQL || 'http://localhost:8088/graphql'
+    endpoint: process.env.GRAPHQLENDPOINT || 'http://localhost:8088/graphql'
   }
 }
