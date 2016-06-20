@@ -39,4 +39,5 @@ if (optimizeMinimize) {
     new webpack.optimize.DedupePlugin()
   ]);
 }
+
 export default config;

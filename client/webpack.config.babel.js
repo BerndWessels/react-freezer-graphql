@@ -19,6 +19,7 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import BrowserSyncPlugin from 'browser-sync-webpack-plugin';
 import CleanWebpackPlugin from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import appConfig from './config';
 
 /**
  * Environment type
@@ -46,7 +47,7 @@ if (buildTest) {
   config.entry = {}
 } else {
   config.entry = {
-    app: './src/index.js'
+    app: ['babel-polyfill', './src/index.js']
   }
 }
 
@@ -265,7 +266,8 @@ if (!buildTest) {
   config.plugins.push(
     new HtmlWebpackPlugin({
       template: './src/index.ejs',
-      inject: false
+      inject: false,
+      baseurl: appConfig.baseurl
     })
   );
 }

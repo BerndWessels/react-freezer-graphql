@@ -11,8 +11,9 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.config.babel.js -p --progress --colors",
-    "dev": "webpack --config webpack.config.babel.js --progress --colors --watch & nodemon build/index.js",
-    "start": "npm run dev",
+    "dev": "webpack --config webpack.config.babel.js --progress --colors --watch",
+    "nodemon": "nodemon build/index.js",
+    "start": "parallelshell \"npm run dev\" \"npm run nodemon\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bugs": {
@@ -32,6 +33,7 @@
     "babel-preset-stage-0": "^6.0.0",
     "json-loader": "^0.5.0",
     "nodemon": "^1.0.0",
+    "parallelshell": "^2.0.0",
     "webpack": "^1.0.0",
     "yargs": "^4.0.0"
   }
