@@ -7,15 +7,18 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+/**
+ * Import dependencies.
+ */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {useRouterHistory, Router} from 'react-router';
 import createBrowserHistory from 'history/lib/createBrowserHistory';
 
 /**
- * Import the application configuration.
+ * Import the application configuration for the environment.
  */
-import config from '../config';
+import env from '../env';
 
 /**
  * Import Internationalization.
@@ -185,7 +188,7 @@ function render() {
  *
  */
 function bla() {
-  return fetch(config.graphql.endpoint, {
+  return fetch(env.graphql.endpoint, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -237,7 +240,7 @@ function bla() {
       return types;
     });
   }).then(types => {
-    return fetch(config.graphql.endpoint, {
+    return fetch(env.graphql.endpoint, {
       method: 'POST',
       headers: {
         Accept: 'application/json',

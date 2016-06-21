@@ -8,7 +8,7 @@
  */
 
 /**
- * Export the configuration.
+ * Export the application configuration for the environment.
  */
 export default {
   baseurl: process.env.BASEURL || '/',

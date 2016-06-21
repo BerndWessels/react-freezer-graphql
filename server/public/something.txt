@@ -1,0 +1,1 @@
+Something that should be copied to the output directory.

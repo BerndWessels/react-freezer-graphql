@@ -19,7 +19,7 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import BrowserSyncPlugin from 'browser-sync-webpack-plugin';
 import CleanWebpackPlugin from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
-import appConfig from './config';
+import env from './env';
 
 /**
  * Environment type
@@ -267,7 +267,7 @@ if (!buildTest) {
     new HtmlWebpackPlugin({
       template: './src/index.ejs',
       inject: false,
-      baseurl: appConfig.baseurl
+      baseurl: env.baseurl
     })
   );
 }
