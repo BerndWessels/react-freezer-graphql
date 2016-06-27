@@ -25,11 +25,12 @@ import appConfig from './config';
 /**
  * Environment type
  */
-const {buildProduction, buildDevelopment, buildTest} = yargs
+const {buildProduction, buildDevelopment} = yargs
   .alias('p', 'build-production')
   .alias('d', 'build-development')
-  .alias('t', 'build-test')
   .argv;
+
+let buildTest = !buildProduction && !buildDevelopment;
 
 /**
  * Config
@@ -50,7 +51,7 @@ if (buildTest) {
   config.entry = {
     app: ['babel-polyfill', './src/index.js']
   }
-} else {
+} else if (buildDevelopment) {
   config.entry = {
     // In case you need to use https for local development please use
     // app: ['babel-polyfill', 'webpack-dev-server/client?https://domain.com:8087', './src/index.js']
@@ -75,7 +76,9 @@ config.externals = {
  * Karma will handle setting it up for you when it's a test build
  */
 if (buildTest) {
-  config.output = {};
+  config.output = {
+    path: __dirname + '/build'
+  };
 } else {
   config.output = {
     // Absolute output directory
@@ -105,7 +108,7 @@ if (buildTest) {
   config.devtool = 'inline-source-map';
 } else if (buildProduction) {
   config.devtool = 'source-map';
-} else {
+} else if (buildDevelopment) {
   config.devtool = 'eval';
 }
 
@@ -197,7 +200,7 @@ var lessLoader = {
   test: /\.less$/,
   // Reference: https://github.com/webpack/style-loader
   // Use style-loader in development for hot-loading
-  loader: (!buildProduction || buildTest) ? 'style!css?sourceMap&modules&importLoaders=2!postcss!resolve-url!less' :
+  loader: (buildDevelopment || buildTest) ? 'style!css?sourceMap&modules&importLoaders=2!postcss!resolve-url!less' :
     // Reference: https://github.com/webpack/extract-text-webpack-plugin
     // Extract less/css files in production builds
     ExtractTextPlugin.extract(
@@ -219,7 +222,7 @@ var sassLoader = {
   // Use css-loader with css-modules support for react-toolbox
   // Reference: https://github.com/postcss/postcss-loader
   // Reference: https://github.com/jtangelder/sass-loader
-  loader: (!buildProduction || buildTest) ? 'style!css?sourceMap&modules&importLoaders=2!postcss!resolve-url!sass?sourceMap' :
+  loader: (buildDevelopment || buildTest) ? 'style!css?sourceMap&modules&importLoaders=2!postcss!resolve-url!sass?sourceMap' :
     // Reference: https://github.com/webpack/extract-text-webpack-plugin
     // Extract sass/css files in production builds
     ExtractTextPlugin.extract('css?sourceMap&modules&importLoaders=2!postcss!resolve-url!sass?sourceMap')
@@ -256,9 +259,9 @@ config.postcss = [
 config.plugins = [
   // Reference: https://github.com/webpack/extract-text-webpack-plugin
   // Extract css files
-  // Disabled when in test mode or not in build mode
+  // Disabled when in development or test mode
   new ExtractTextPlugin('[name].[hash].css', {
-    disable: !buildProduction || buildTest
+    disable: buildDevelopment || buildTest
   }),
   // Reference: http://mts.io/2015/04/08/webpack-shims-polyfills/
   // Inject a polyfill for the given key words
@@ -311,7 +314,7 @@ if (buildProduction) {
 }
 
 // Add dev specific plugins
-if (!buildProduction && !buildTest) {
+if (buildDevelopment) {
   config.plugins.push(
     // https://webpack.github.io/docs/list-of-plugins.html#occurenceorderplugin
     new webpack.optimize.OccurenceOrderPlugin(),

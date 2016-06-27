@@ -34,6 +34,7 @@ import styles from './styles';
 /**
  * Import Internationalization.
  */
+import {FormattedMessage} from 'react-intl';
 
 /**
  * The component.
@@ -92,6 +93,12 @@ export default class extends React.Component {
     // Calculate the styles.
     const className = classnames(styles.root, {[`${styles.loading}`]: state.app.something});
     // Return the component UI.
-    return <div className={className}></div>;
+    return <div className={className}>
+      <FormattedMessage
+        id='app.greeting'
+        description='Greeting to welcome the user to the app'
+        defaultMessage='Hello, {name}!'
+        values={{name: <b>Stranger</b>}}/>
+    </div>;
   }
 }
