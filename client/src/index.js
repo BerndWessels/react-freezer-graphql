@@ -16,11 +16,6 @@ import {useRouterHistory, Router} from 'react-router';
 import createBrowserHistory from 'history/lib/createBrowserHistory';
 
 /**
- * Import the application configuration for the environment.
- */
-import env from '../env';
-
-/**
  * Import Internationalization.
  */
 import {IntlProvider, addLocaleData} from 'react-intl';
@@ -32,7 +27,7 @@ import intlMessagesEN from '../public/assets/translations/en.json';
 /**
  * Import Store.
  */
-import {default as store, setAccessToken} from './store';
+import {default as store, setAccessToken, fetchTypes} from './store';
 
 /**
  * Import Routes.
@@ -47,7 +42,7 @@ import styles from './styles';
 /**
  * Create the routing history.
  */
-const browserHistory = useRouterHistory(createBrowserHistory)({basename: '/'});
+const browserHistory = useRouterHistory(createBrowserHistory)({basename: _CONFIG_.baseurl});
 
 /**
  * Add internationalization for supported languages.
@@ -162,12 +157,20 @@ class Index extends React.Component {
   render() {
     // Get the application state.
     const state = store.get();
-    // Return the component UI.
-    return (
-      <IntlProvider locale={state.locale} messages={intlMessages(state.locale)}>
-        <Router history={browserHistory} routes={routes} createElement={this.createElement}/>
-      </IntlProvider>
-    );
+    // Make sure the entity cache is ready to be used.
+    if(state.typesLoaded) {
+      // Return the component UI.
+      return (
+        <IntlProvider locale={state.locale} messages={intlMessages(state.locale)}>
+          <Router history={browserHistory} routes={routes} createElement={this.createElement}/>
+        </IntlProvider>
+      );
+    } else {
+      // Return a loading indicator.
+      return (
+        <h1>LOADING ...</h1>
+      )
+    }
   }
 }
 
@@ -185,207 +188,19 @@ function render() {
 }
 
 /**
- *
- */
-function bla() {
-  return fetch(env.graphql.endpoint, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      Authorization: 'Bearer 123',
-      'Content-type': 'application/json; charset=UTF-8'
-    },
-    body: JSON.stringify({
-      query: `
-      {
-        __schema {
-          types {
-            name
-            kind
-            ofType {
-              name
-              kind
-            }
-            fields {
-              name
-              type {
-                name
-                kind
-                ofType {
-                  name
-                  kind
-                  ofType {
-                    name
-                    kind
-                  }
-                }
-              }
-            }
-          }
-        }
-      }`
-    })
-  }).then(response => {
-    return response.json().then(result => {
-      let types = result.data.__schema.types.reduce((prev, curr) => {
-        if (curr.kind === 'OBJECT') {
-          curr.fields = curr.fields.reduce((prev, curr) => {
-            prev[curr.name] = curr;
-            return prev;
-          }, {});
-        }
-        prev[curr.name] = curr;
-        return prev;
-      }, {});
-      return types;
-    });
-  }).then(types => {
-    return fetch(env.graphql.endpoint, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        Authorization: 'Bearer 123',
-        'Content-type': 'application/json; charset=UTF-8'
-      },
-      body: JSON.stringify({
-        query: `
-        {
-          human(id: "1") {
-            id
-            lastName
-            favouritePet {
-              __typename
-              ... on Dog {
-                id
-                name
-              }
-              ... on Cat {
-                id
-                name
-                meeaaoo
-              }
-            }
-            pets {
-              __typename
-              ... on Dog {
-                id
-                name
-                bark
-                owner {
-                  id
-                  firstName
-                }
-              }
-              ... on Cat {
-                id
-                name
-                meeaaoo
-              }
-            }
-            dogs {
-              id
-              name
-              bark
-            }
-            numbers
-          }
-        }`
-      })
-    }).then(response => {
-      return response.json().then(result => {
-        console.log(JSON.stringify(types, null, 2));
-        console.log(JSON.stringify(result, null, 2));
-
-        function processNode(entities, node, nodeTypeName) {
-          let nodeType = node.hasOwnProperty('__typename') ? types[node.__typename] : types[nodeTypeName];
-          var entity = {};
-          for (let nodePropName in node) {
-            if (nodePropName === '__typename') continue;
-            let nodePropType = nodeType.fields[nodePropName].type;
-            let nodePropValue = node[nodePropName];
-            switch (nodePropType.kind) {
-              case 'SCALAR':
-              case 'ENUM':
-                entity[nodePropName] = nodePropValue;
-                break;
-              case 'OBJECT':
-                entity[nodePropName] = {
-                  type: nodePropType.name,
-                  id: processNode(entities, nodePropValue, nodePropType.name).id
-                };
-                break;
-              case 'UNION':
-                // TODO make sure there is a __typename and handle more than just UNIONs of OBJECTs here
-                entity[nodePropName] = {
-                  type: nodePropValue.__typename,
-                  id: processNode(entities, nodePropValue).id
-                };
-                break;
-              case 'LIST':
-                switch (nodePropType.ofType.kind) {
-                  case 'SCALAR':
-                  case 'ENUM':
-                    entity[nodePropName] = nodePropValue;
-                    break;
-                  case 'OBJECT':
-                    entity[nodePropName] = [];
-                    nodePropValue.forEach(listItem => {
-                      entity[nodePropName].push({
-                        type: nodePropType.ofType.name,
-                        id: processNode(entities, listItem, nodePropType.ofType.name).id
-                      });
-                    });
-                    break;
-                  case 'UNION':
-                    entity[nodePropName] = [];
-                    nodePropValue.forEach(listItem => {
-                      // TODO include the type here, id is not enough
-                      entity[nodePropName].push({
-                        type: listItem.__typename,
-                        id: processNode(entities, listItem).id
-                      });
-                    });
-                    break;
-                  case 'LIST':
-                    switch (nodePropType.ofType.ofType.kind) {
-                      case 'SCALAR':
-                      case 'ENUM':
-                        entity[nodePropName] = nodePropValue;
-                        break;
-                      // TODO support more than just SCALARs in LIST of LISTs
-                    }
-                    break;
-                }
-                break;
-            }
-          }
-          //console.log(node.__typename ? node.__typename : nodeTypeName, entity);
-          // merge entity now into the entity cache with Object.assign
-          // and allow a merge callback for special cases
-          if (!entities.hasOwnProperty(nodeType.name)) {
-            entities[nodeType.name] = {};
-          }
-          if (entities[nodeType.name].hasOwnProperty(entity.id)) {
-            Object.assign(entities[nodeType.name][entity.id], entity);
-          } else {
-            entities[nodeType.name][entity.id] = entity;
-          }
-          return entity;
-        }
-
-        let entities = {};
-
-        processNode(entities, result.data, 'Query');
-
-        console.log(entities);
-      })
-    })
-  });
-}
-
-bla();
-
-/**
  * Start the application.
  */
 render();
+
+/**
+ * Fetch the GraphQL types from the schema.
+ */
+fetchTypes().then(() => {
+  // Get the application state.
+  const state = store.get();
+  // Allow the application to start.
+  state.typesLoaded = true;
+}).catch((reason) => {
+  // TODO handle it, maybe retry and let the user know whats happening.
+  // TODO types could also be retrieved from LocalStorage to enable a kind of offline mode.
+});

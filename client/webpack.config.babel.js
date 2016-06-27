@@ -15,11 +15,12 @@ import yargs from 'yargs';
 import webpack from 'webpack';
 import autoprefixer from 'autoprefixer';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import ExtendedDefinePlugin from 'extended-define-webpack-plugin';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import BrowserSyncPlugin from 'browser-sync-webpack-plugin';
 import CleanWebpackPlugin from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
-import env from './env';
+import appConfig from './config';
 
 /**
  * Environment type
@@ -45,8 +46,15 @@ let config = {};
  */
 if (buildTest) {
   config.entry = {}
+} else if (buildProduction) {
+  config.entry = {
+    app: ['babel-polyfill', './src/index.js']
+  }
 } else {
   config.entry = {
+    // In case you need to use https for local development please use
+    // app: ['babel-polyfill', 'webpack-dev-server/client?https://domain.com:8087', './src/index.js']
+    // Also update config.output.publicPath to the https url.
     app: ['babel-polyfill', './src/index.js']
   }
 }
@@ -226,7 +234,7 @@ if (buildTest) {
 }
 
 // Add cssLoader to the loader list
-// To use less use: config.module.loaders.push(lessLoader);
+// To use less use add: config.module.loaders.push(lessLoader);
 config.module.loaders.push(sassLoader);
 
 /**
@@ -256,6 +264,9 @@ config.plugins = [
   // Inject a polyfill for the given key words
   new webpack.ProvidePlugin({
     'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
+  }),
+  new ExtendedDefinePlugin({
+    _CONFIG_: appConfig
   })
 ];
 
@@ -267,7 +278,7 @@ if (!buildTest) {
     new HtmlWebpackPlugin({
       template: './src/index.ejs',
       inject: false,
-      baseurl: env.baseurl
+      baseurl: appConfig.baseurl
     })
   );
 }
@@ -311,10 +322,10 @@ if (!buildProduction && !buildTest) {
     new webpack.OldWatchingPlugin(),
     // https://webpack.github.io/docs/list-of-plugins.html#dedupeplugin
     new webpack.optimize.DedupePlugin(),
-    // https://webpack.github.io/docs/list-of-plugins.html#noerrorsplugin
-    new webpack.NoErrorsPlugin(),
-    // Reference: http://webpack.github.io/docs/list-of-plugins.html#noerrorsplugin
     // Only emit files when there are no errors
+    // Reference: http://webpack.github.io/docs/list-of-plugins.html#noerrorsplugin
+    new webpack.NoErrorsPlugin(),
+    // Reference: https://github.com/Va1/browser-sync-webpack-plugin
     new BrowserSyncPlugin(
       {
         host: 'localhost',

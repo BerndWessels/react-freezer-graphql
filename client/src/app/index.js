@@ -81,9 +81,30 @@ export default class extends React.Component {
 
             setTimeout(() => {
               let state = this.props.store.get();
+              state.app.set('something', 'nothing');
+
+              setTimeout(() => {
+              let state = this.props.store.get();
               let app = state.app.transact();
               Object.assign(app.dog[99], {age: 88});
               state.app.run();
+
+                setTimeout(() => {
+                  let state = this.props.store.get();
+                  state.app.set('something', 'more');
+
+                  setTimeout(() => {
+                    let state = this.props.store.get();
+                    let app = state.app.transact();
+                    Object.assign(app.dog[99], {age: 12});
+                    state.app.run();
+
+                  }, 1000);
+
+                }, 1000);
+
+
+              }, 1000);
 
             }, 1000);
 
@@ -115,6 +136,7 @@ export default class extends React.Component {
     return (
       <div className={className}>
         <h1>APP1</h1>
+        <div>{this.props.state.app.something}</div>
         <div>{JSON.stringify(this.props.state.app.human[0])}</div>
         <div>{JSON.stringify(this.props.state.app.dog[99])}</div>
         <hr/>
