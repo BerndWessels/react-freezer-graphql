@@ -17,6 +17,7 @@ import classnames from 'classnames';
 /**
  * Import Reactions.
  */
+import {toggleLocale} from './reactions';
 
 /**
  * Import Components.
@@ -93,7 +94,7 @@ export default class extends React.Component {
     // Calculate the styles.
     const className = classnames(styles.root, {[`${styles.loading}`]: state.app.something});
     // Return the component UI.
-    return <div className={className}>
+    return <div className={className} onClick={() => toggleLocale()}>
       <FormattedMessage
         id='app.greeting'
         description='Greeting to welcome the user to the app'

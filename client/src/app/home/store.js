@@ -8,16 +8,12 @@
  */
 
 /**
- * Import all child component's store fragments.
+ * Import all child component's default store fragments.
  */
-import home from './home/store';
 
 /**
- * Export the component's store fragment.
+ * Export the component's default store fragment.
  */
 export default {
-  home: home,
-  something: 'anything',
-  human: {},
-  dog: {}
+  isLoading: false
 }

@@ -8,16 +8,13 @@
  */
 
 /**
- * Import all child component's store fragments.
+ * Import store access.
  */
-import home from './home/store';
+import {default as store, fetchQuery} from '../store';
 
 /**
- * Export the component's store fragment.
+ * Do something.
  */
-export default {
-  home: home,
-  something: 'anything',
-  human: {},
-  dog: {}
+export function doSomething() {
+  console.log('do it!');
 }

@@ -32,20 +32,6 @@ const store = new Freezer({
 export default store;
 
 /**
- * This helper simplifies the creation of reactions.
- * @param exports
- * @param name
- * @param handler
- * @param trigger
- */
-export function createReaction(exports, name, handler, trigger) {
-  store.on(name, handler);
-  exports[name.replace(/:/g, '_')] = trigger ? trigger : (...args) => {
-    store.trigger(name, ...args);
-  };
-}
-
-/**
  * The access token to be used with every call to the GraphQL API.
  */
 let _accessToken = '';

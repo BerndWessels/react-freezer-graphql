@@ -65,54 +65,6 @@ export default class extends React.Component {
     super(props);
   }
 
-  componentDidMount() {
-        setTimeout(() => {
-          let state = this.props.store.get();
-          let app = state.app.transact();
-          app.human[0] = {firstName: 'Bernd'};
-          app.dog[99] = {name: 'Brutus'};
-          state.app.run();
-
-          setTimeout(() => {
-            let state = this.props.store.get();
-            let app = state.app.transact();
-            Object.assign(app.human[0], {lastName: 'Bernd', dog: app.dog[99]});
-            state.app.run();
-
-            setTimeout(() => {
-              let state = this.props.store.get();
-              state.app.set('something', 'nothing');
-
-              setTimeout(() => {
-              let state = this.props.store.get();
-              let app = state.app.transact();
-              Object.assign(app.dog[99], {age: 88});
-              state.app.run();
-
-                setTimeout(() => {
-                  let state = this.props.store.get();
-                  state.app.set('something', 'more');
-
-                  setTimeout(() => {
-                    let state = this.props.store.get();
-                    let app = state.app.transact();
-                    Object.assign(app.dog[99], {age: 12});
-                    state.app.run();
-
-                  }, 1000);
-
-                }, 1000);
-
-
-              }, 1000);
-
-            }, 1000);
-
-          }, 1000);
-
-        }, 1000);
-    }
-
   // Invoked before rendering when new props or state are being received.
   // This method is not called for the initial render or when forceUpdate is used.
   // Use this as an opportunity to return false

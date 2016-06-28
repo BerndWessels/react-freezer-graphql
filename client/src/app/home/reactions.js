@@ -8,16 +8,14 @@
  */
 
 /**
- * Import all child component's store fragments.
+ * Import store access.
  */
-import home from './home/store';
+import {default as store, fetchQuery} from '../../store';
 
 /**
- * Export the component's store fragment.
+ * Toggle the locale.
  */
-export default {
-  home: home,
-  something: 'anything',
-  human: {},
-  dog: {}
+export function toggleLocale() {
+  let state = store.get();
+  state.set('locale', state.locale == 'en' ? 'de' : 'en');
 }
